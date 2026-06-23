@@ -500,17 +500,19 @@
   <div id="cfg">
     <div class="cfg-card">
       <h2>Pengaturan Display</h2>
-      <!-- <label>Endpoint backend (kosongkan untuk mode demo)</label> -->
-      <!-- <input id="inApi" placeholder="/api/room/{room}/today"> -->
+      <!-- <label>Endpoint backend (kosongkan untuk mode demo)</label>
+      <input id="inApi" placeholder="/api/room/{room}/today"> -->
       <label>Room key (mis. excellent)</label>
       <input id="inRoom" placeholder="excellent">
-      <!-- <label>Interval refresh (detik)</label> -->
-      <!-- <input id="inInt" type="number" min="5" placeholder="20"> -->
+      <!-- <label>Interval refresh (detik)</label>
+      <input id="inInt" type="number" min="5" placeholder="20"> -->
       <div class="row">
         <button class="btn-cancel" id="btnCancel">Batal</button>
         <button class="btn-save" id="btnSave">Simpan</button>
       </div>
       <div class="hint">
+        Display memanggil backend Anda yang mengembalikan JSON:
+
         <code>{room}</code> pada URL diganti otomatis dengan room key.
       </div>
     </div>
