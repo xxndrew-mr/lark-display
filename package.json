@@ -1,0 +1,14 @@
+{
+  "name": "lark-room-display",
+  "version": "1.0.0",
+  "description": "Backend penghubung Lark Calendar (rooms) untuk display status ruang meeting di tablet",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "find-calendar": "node find-calendar.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Display Ruang Meeting</title>
+  <style>
+    :root {
+      --paper: #F3F1EA;
+      --ink: #14110E;
+      --line: rgba(20, 17, 14, .14);
+      --muted: #6B655C;
+      --free: #15824B;
+      --busy: #C5362F;
+      --soon: #D98A1F;
+      --on: #FFFFFF;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    html,
+    body {
+      height: 100%
+    }
+
+    body {
+      font-family: 'Helvetica Neue', Helvetica, Arial, 'Segoe UI', system-ui, sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      overflow: hidden;
+      user-select: none;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ---------- Grid utama: panggung (status) + agenda ---------- */
+    .screen {
+      height: 100vh;
+      display: grid;
+      grid-template-columns: 1.35fr 1fr
+    }
+
+    .stage {
+      position: relative;
+      padding: 5.5vh 4vw;
+      display: flex;
+      flex-direction: column;
+      color: var(--on);
+      background: #222;
+      transition: background .6s ease
+    }
+
+    .screen.free .stage {
+      background: var(--free)
+    }
+
+    .screen.busy .stage {
+      background: var(--busy)
+    }
+
+    .screen.soon .stage {
+      background: var(--soon)
+    }
+
+    /* eyebrow + nama ruang */
+    .eyebrow {
+      font-size: clamp(11px, 1.25vw, 18px);
+      letter-spacing: .32em;
+      text-transform: uppercase;
+      font-weight: 700;
+      opacity: .72
+    }
+
+    .room-name {
+      font-size: clamp(40px, 6.6vw, 128px);
+      font-weight: 800;
+      line-height: .95;
+      letter-spacing: -.02em;
+      margin-top: 1.4vh
+    }
+
+    .room-meta {
+      font-size: clamp(13px, 1.5vw, 22px);
+      font-weight: 500;
+      opacity: .78;
+      margin-top: 1.4vh;
+      display: flex;
+      gap: 1.4vw;
+      flex-wrap: wrap
+    }
+
+    .room-meta span {
+      position: relative
+    }
+
+    .room-meta span+span::before {
+      content: "";
+      position: absolute;
+      left: -.7vw;
+      top: .15em;
+      bottom: .15em;
+      width: 1px;
+      background: currentColor;
+      opacity: .4
+    }
+
+    /* status besar */
+    .status-wrap {
+      margin-top: auto
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 1.6vw;
+      font-size: clamp(46px, 8.2vw, 150px);
+      font-weight: 800;
+      letter-spacing: -.02em;
+      line-height: .92
+    }
+
+    .status .mk {
+      width: clamp(16px, 1.7vw, 30px);
+      height: clamp(16px, 1.7vw, 30px);
+      border-radius: 50%;
+      background: var(--on);
+      flex: none
+    }
+
+    .current {
+      margin-top: 2.2vh;
+      border-top: 2px solid rgba(255, 255, 255, .35);
+      padding-top: 2.2vh;
+      max-width: 46vw
+    }
+
+    .current .label {
+      font-size: clamp(11px, 1.15vw, 16px);
+      letter-spacing: .28em;
+      text-transform: uppercase;
+      font-weight: 700;
+      opacity: .72
+    }
+
+    .current .title {
+      font-size: clamp(22px, 2.9vw, 46px);
+      font-weight: 700;
+      margin-top: .6vh;
+      line-height: 1.04
+    }
+
+    .current .sub {
+      font-size: clamp(15px, 1.7vw, 26px);
+      font-weight: 500;
+      opacity: .85;
+      margin-top: .8vh;
+      font-variant-numeric: tabular-nums
+    }
+
+    /* jam besar di pojok bawah panggung */
+    .clock {
+      position: absolute;
+      right: 4vw;
+      bottom: 5.5vh;
+      text-align: right
+    }
+
+    .clock .time {
+      font-size: clamp(30px, 4vw, 68px);
+      font-weight: 800;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -.02em
+    }
+
+    /* ---------- Agenda (paper) ---------- */
+    .agenda {
+      padding: 5.5vh 3vw;
+      display: flex;
+      flex-direction: column;
+      min-width: 0
+    }
+
+    .agenda-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      border-bottom: 3px solid var(--ink);
+      padding-bottom: 1.4vh
+    }
+
+    .agenda-head h3 {
+      font-size: clamp(13px, 1.4vw, 20px);
+      letter-spacing: .26em;
+      text-transform: uppercase;
+      font-weight: 800
+    }
+
+    .agenda-head .date {
+      font-size: clamp(12px, 1.2vw, 17px);
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .08em
+    }
+
+    #slots {
+      margin-top: 1vh;
+      overflow: hidden;
+      counter-reset: slot
+    }
+
+    .slot {
+      counter-increment: slot;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: baseline;
+      gap: 1.4vw;
+      padding: 1.9vh 0;
+      border-bottom: 1px solid var(--line)
+    }
+
+    .slot::before {
+      content: counter(slot, decimal-leading-zero);
+      font-size: clamp(12px, 1.2vw, 18px);
+      font-weight: 700;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums
+    }
+
+    .slot .stime {
+      font-size: clamp(17px, 2vw, 30px);
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -.01em;
+      white-space: nowrap
+    }
+
+    .slot .stitle {
+      font-size: clamp(13px, 1.3vw, 19px);
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      margin-top: .4vh
+    }
+
+    .slot .col2 {
+      min-width: 0
+    }
+
+    .slot .sorg {
+      display: none
+    }
+
+    .slot .stag {
+      font-size: clamp(10px, 1vw, 14px);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .16em;
+      color: var(--busy);
+      white-space: nowrap
+    }
+
+    .slot.passed {
+      opacity: .38
+    }
+
+    .slot.live .stime {
+      color: var(--busy)
+    }
+
+    .empty {
+      padding: 2.4vh 0;
+      color: var(--muted);
+      font-size: clamp(15px, 1.6vw, 22px);
+      font-weight: 600
+    }
+
+    .agenda-foot {
+      margin-top: auto;
+      padding-top: 1.6vh;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: clamp(10px, 1vw, 14px);
+      color: var(--muted);
+      letter-spacing: .04em
+    }
+
+    .conn-ok::before {
+      content: "";
+      display: inline-block;
+      width: .7em;
+      height: .7em;
+      border-radius: 50%;
+      background: var(--free);
+      margin-right: .5em;
+      vertical-align: .02em
+    }
+
+    .conn-demo::before {
+      content: "";
+      display: inline-block;
+      width: .7em;
+      height: .7em;
+      border-radius: 50%;
+      background: var(--soon);
+      margin-right: .5em;
+      vertical-align: .02em
+    }
+
+    .conn-err::before {
+      content: "";
+      display: inline-block;
+      width: .7em;
+      height: .7em;
+      border-radius: 50%;
+      background: var(--busy);
+      margin-right: .5em;
+      vertical-align: .02em
+    }
+
+    /* ---------- Portrait / layar sempit: tumpuk ---------- */
+    @media (max-aspect-ratio:1/1) {
+      .screen {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1.1fr 1fr
+      }
+
+      .current {
+        max-width: none
+      }
+
+      .clock {
+        position: static;
+        text-align: left;
+        margin-top: 2vh
+      }
+
+      .status-wrap {
+        margin-top: 3vh
+      }
+    }
+
+    /* ---------- Config gear ---------- */
+    #gear {
+      position: fixed;
+      top: 14px;
+      right: 14px;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .18);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      z-index: 20;
+      backdrop-filter: blur(4px)
+    }
+
+    #cfg {
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 17, 14, .6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 30
+    }
+
+    #cfg.show {
+      display: flex
+    }
+
+    .cfg-card {
+      background: var(--paper);
+      border-radius: 8px;
+      padding: 30px;
+      width: min(520px, 92vw);
+      border: 2px solid var(--ink)
+    }
+
+    .cfg-card h2 {
+      font-size: 20px;
+      margin-bottom: 8px;
+      letter-spacing: .04em;
+      text-transform: uppercase
+    }
+
+    .cfg-card label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin: 14px 0 4px;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      font-weight: 700
+    }
+
+    .cfg-card input {
+      width: 100%;
+      padding: 11px 12px;
+      border-radius: 4px;
+      border: 1px solid var(--ink);
+      background: #fff;
+      color: var(--ink);
+      font-size: 14px;
+      font-family: inherit
+    }
+
+    .cfg-card .row {
+      display: flex;
+      gap: 14px;
+      margin-top: 24px;
+      justify-content: flex-end
+    }
+
+    .cfg-card button {
+      padding: 11px 20px;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-family: inherit
+    }
+
+    .btn-save {
+      background: var(--ink);
+      color: #fff
+    }
+
+    .btn-cancel {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--line)
+    }
+
+    .hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 16px;
+      line-height: 1.6
+    }
+
+    .hint code {
+      background: rgba(20, 17, 14, .06);
+      padding: 1px 5px;
+      border-radius: 3px
+    }
+  </style>
+</head>
+
+<body>
+  <div class="screen" id="screen">
+    <!-- PANGGUNG: status -->
+    <section class="stage">
+      <div class="eyebrow">Ruang Meeting</div>
+      <div class="room-name" id="roomName">Ruang</div>
+      <div class="room-meta" id="roomMeta"></div>
+
+      <div class="status-wrap">
+        <div class="status"><span class="mk"></span><span id="statusText">—</span></div>
+        <div class="current">
+          <div class="label" id="curLabel">Sekarang</div>
+          <div class="title" id="curTitle">—</div>
+          <div class="sub" id="curSub"></div>
+        </div>
+      </div>
+
+      <div class="clock">
+        <div class="time" id="clockTime">--:--</div>
+      </div>
+    </section>
+
+    <!-- AGENDA -->
+    <aside class="agenda">
+      <div class="agenda-head">
+        <h3>Jadwal Hari Ini</h3>
+        <div class="date" id="clockDate">—</div>
+      </div>
+      <div id="slots"></div>
+      <div class="agenda-foot">
+        <span id="conn" class="conn-demo">Mode demo</span>
+        <span>Diperbarui <span id="updatedAt">—</span></span>
+      </div>
+    </aside>
+  </div>
+
+  <button id="gear" title="Pengaturan">&#9881;</button>
+
+  <div id="cfg">
+    <div class="cfg-card">
+      <h2>Pengaturan Display</h2>
+      <label>Endpoint backend (kosongkan untuk mode demo)</label>
+      <input id="inApi" placeholder="/api/room/{room}/today">
+      <label>Room key (mis. excellent)</label>
+      <input id="inRoom" placeholder="excellent">
+      <label>Interval refresh (detik)</label>
+      <input id="inInt" type="number" min="5" placeholder="20">
+      <div class="row">
+        <button class="btn-cancel" id="btnCancel">Batal</button>
+        <button class="btn-save" id="btnSave">Simpan</button>
+      </div>
+      <div class="hint">
+        Display memanggil backend Anda yang mengembalikan JSON:
+        <code>{ room, now, events:[{title,start,end}] }</code>.
+        <code>{room}</code> pada URL diganti otomatis dengan room key.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ---------- Konfigurasi ----------
+    const params = new URLSearchParams(location.search);
+    const cfg = {
+      api: params.get('api') || '/api/room/{room}/today',
+      room: params.get('room') || 'excellent',
+      interval: parseInt(params.get('refresh') || '20', 10)
+    };
+
+    // ---------- Data contoh (mode demo) ----------
+    function demoData() {
+      const now = new Date();
+      const at = (h, m) => { const d = new Date(now); d.setHours(h, m, 0, 0); return d.toISOString(); };
+      return {
+        room: { key: cfg.room, name: 'Excellent', capacity: 4, location: 'Lantai 1' },
+        now: now.toISOString(),
+        events: [
+          { title: 'Terpakai', start: at(9, 0), end: at(10, 30) },
+          { title: 'Terpakai', start: at(11, 0), end: at(12, 0) },
+          { title: 'Terpakai', start: at(13, 30), end: at(14, 0) },
+          { title: 'Terpakai', start: at(15, 0), end: at(16, 0) }
+        ]
+      };
+    }
+
+    // ---------- Pengambilan data ----------
+    let timer = null;
+    async function fetchData() {
+      if (!cfg.api) { render(demoData(), 'demo'); return; }
+      try {
+        const url = cfg.api.replace('{room}', encodeURIComponent(cfg.room));
+        const res = await fetch(url, { cache: 'no-store' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        render(data, 'ok');
+      } catch (e) {
+        setConn('err', 'Gagal terhubung');
+      }
+    }
+
+    // ---------- Render ----------
+    function fmt(d) { return new Date(d).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }); }
+
+    function render(data, mode) {
+      const now = new Date(data.now || Date.now());
+      document.getElementById('roomName').textContent = data.room?.name || cfg.room;
+      const metaEl = document.getElementById('roomMeta');
+      const bits = [];
+      if (data.room?.capacity) bits.push('Kapasitas ' + data.room.capacity);
+      if (data.room?.location) bits.push(data.room.location);
+      metaEl.innerHTML = bits.map(b => '<span>' + b + '</span>').join('');
+
+      const events = (data.events || [])
+        .map(e => ({ ...e, s: new Date(e.start), e2: new Date(e.end) }))
+        .sort((a, b) => a.s - b.s);
+
+      const current = events.find(ev => now >= ev.s && now < ev.e2);
+      const upcoming = events.filter(ev => ev.s > now);
+      const soon = upcoming[0] && (upcoming[0].s - now) <= 15 * 60 * 1000 ? upcoming[0] : null;
+
+      const screen = document.getElementById('screen');
+      screen.classList.remove('free', 'busy', 'soon');
+      const stt = document.getElementById('statusText');
+      const curLabel = document.getElementById('curLabel');
+      const curTitle = document.getElementById('curTitle');
+      const curSub = document.getElementById('curSub');
+
+      if (current) {
+        screen.classList.add('busy');
+        stt.textContent = 'DIPAKAI';
+        curLabel.textContent = 'Sedang berlangsung';
+        curTitle.textContent = current.title;
+        curSub.textContent = fmt(current.s) + ' – ' + fmt(current.e2);
+      } else if (soon) {
+        screen.classList.add('soon');
+        stt.textContent = 'SEGERA';
+        curLabel.textContent = 'Berikutnya';
+        curTitle.textContent = soon.title;
+        curSub.textContent = 'Mulai ' + fmt(soon.s);
+      } else {
+        screen.classList.add('free');
+        stt.textContent = 'KOSONG';
+        if (upcoming[0]) {
+          curLabel.textContent = 'Booking berikutnya';
+          curTitle.textContent = upcoming[0].title;
+          curSub.textContent = fmt(upcoming[0].s) + ' – ' + fmt(upcoming[0].e2);
+        } else {
+          curLabel.textContent = 'Sisa hari ini';
+          curTitle.textContent = 'Tidak ada jadwal';
+          curSub.textContent = 'Ruangan tersedia';
+        }
+      }
+
+      // timeline
+      const wrap = document.getElementById('slots');
+      wrap.innerHTML = '';
+      if (events.length === 0) {
+        wrap.innerHTML = '<div class="empty">Belum ada booking hari ini.</div>';
+      }
+      events.forEach(ev => {
+        const live = now >= ev.s && now < ev.e2;
+        const passed = ev.e2 <= now;
+        const div = document.createElement('div');
+        div.className = 'slot' + (passed ? ' passed' : '') + (live ? ' live' : '');
+        div.innerHTML = '<div class="stime">' + fmt(ev.s) + ' – ' + fmt(ev.e2) + '</div>'
+          + '<div class="col2"><div class="stitle">' + (ev.title || 'Terpakai') + '</div></div>'
+          + (live ? '<div class="stag">Berlangsung</div>' : '<div></div>');
+        wrap.appendChild(div);
+      });
+
+      setConn(mode === 'ok' ? 'ok' : 'demo', mode === 'ok' ? 'Terhubung' : 'Mode demo');
+      document.getElementById('updatedAt').textContent = new Date().toLocaleTimeString('id-ID');
+    }
+
+    function setConn(state, label) {
+      const el = document.getElementById('conn');
+      el.className = state === 'ok' ? 'conn-ok' : state === 'err' ? 'conn-err' : 'conn-demo';
+      el.textContent = label;
+    }
+
+    // ---------- Jam ----------
+    function tickClock() {
+      const n = new Date();
+      document.getElementById('clockTime').textContent =
+        n.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+      document.getElementById('clockDate').textContent =
+        n.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    }
+
+    // ---------- Loop ----------
+    function startLoop() {
+      if (timer) clearInterval(timer);
+      fetchData();
+      timer = setInterval(fetchData, Math.max(5, cfg.interval) * 1000);
+    }
+
+    // ---------- Panel pengaturan ----------
+    const cfgEl = document.getElementById('cfg');
+    document.getElementById('gear').onclick = () => {
+      document.getElementById('inApi').value = cfg.api;
+      document.getElementById('inRoom').value = cfg.room;
+      document.getElementById('inInt').value = cfg.interval;
+      cfgEl.classList.add('show');
+    };
+    document.getElementById('btnCancel').onclick = () => cfgEl.classList.remove('show');
+    document.getElementById('btnSave').onclick = () => {
+      cfg.api = document.getElementById('inApi').value.trim();
+      cfg.room = document.getElementById('inRoom').value.trim() || 'excellent';
+      cfg.interval = parseInt(document.getElementById('inInt').value, 10) || 20;
+      cfgEl.classList.remove('show');
+      startLoop();
+    };
+
+    // ---------- Init ----------
+    tickClock(); setInterval(tickClock, 1000);
+    startLoop();
+  </script>
+</body>
+
+</html>
