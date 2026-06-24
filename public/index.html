@@ -3,7 +3,8 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
   <title>Display Ruang Meeting</title>
   <style>
     :root {
@@ -12,8 +13,8 @@
       --line: rgba(20, 17, 14, .14);
       --muted: #6B655C;
       --free: #15824B;
-      --busy: #C5362F;
-      --soon: #D98A1F;
+      --busy: #2563EB;
+      --ending: #C5362F;
       --on: #FFFFFF;
     }
 
@@ -25,7 +26,8 @@
 
     html,
     body {
-      height: 100%
+      height: 100%;
+      touch-action: manipulation
     }
 
     body {
@@ -34,7 +36,7 @@
       color: var(--ink);
       overflow: hidden;
       user-select: none;
-      -webkit-font-smoothing: antialiased;
+      -webkit-font-smoothing: antialiased
     }
 
     .screen {
@@ -50,7 +52,9 @@
       flex-direction: column;
       color: var(--on);
       background: #222;
-      transition: background .6s ease
+      transition: background .6s ease;
+      min-width: 0;
+      overflow: hidden
     }
 
     .screen.free .stage {
@@ -61,8 +65,8 @@
       background: var(--busy)
     }
 
-    .screen.soon .stage {
-      background: var(--soon)
+    .screen.ending .stage {
+      background: var(--ending)
     }
 
     .eyebrow {
@@ -74,7 +78,7 @@
     }
 
     .room-name {
-      font-size: clamp(40px, 6.6vw, 128px);
+      font-size: clamp(40px, 6.2vw, 120px);
       font-weight: 800;
       line-height: .95;
       letter-spacing: -.02em;
@@ -106,33 +110,42 @@
       opacity: .4
     }
 
+    /* baris bawah: status (kiri) + countdown/jam (kanan) — tidak bertumpuk */
+    .bottom {
+      margin-top: auto;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 3vw
+    }
+
     .status-wrap {
-      margin-top: auto
+      min-width: 0;
+      flex: 1
     }
 
     .status {
       display: flex;
       align-items: center;
-      gap: 1.6vw;
-      font-size: clamp(46px, 8.2vw, 150px);
+      gap: 1.4vw;
+      font-size: clamp(44px, 7.6vw, 140px);
       font-weight: 800;
       letter-spacing: -.02em;
       line-height: .92
     }
 
     .status .mk {
-      width: clamp(16px, 1.7vw, 30px);
-      height: clamp(16px, 1.7vw, 30px);
+      width: clamp(15px, 1.6vw, 28px);
+      height: clamp(15px, 1.6vw, 28px);
       border-radius: 50%;
       background: var(--on);
       flex: none
     }
 
     .current {
-      margin-top: 2.2vh;
+      margin-top: 2vh;
       border-top: 2px solid rgba(255, 255, 255, .35);
-      padding-top: 2.2vh;
-      max-width: 46vw
+      padding-top: 2vh
     }
 
     .current .label {
@@ -144,33 +157,58 @@
     }
 
     .current .title {
-      font-size: clamp(22px, 2.9vw, 46px);
+      font-size: clamp(20px, 2.7vw, 42px);
       font-weight: 700;
       margin-top: .6vh;
-      line-height: 1.04
+      line-height: 1.05
     }
 
     .current .sub {
-      font-size: clamp(15px, 1.7vw, 26px);
+      font-size: clamp(14px, 1.6vw, 24px);
       font-weight: 500;
       opacity: .85;
-      margin-top: .8vh;
+      margin-top: .7vh;
       font-variant-numeric: tabular-nums
     }
 
     .clock {
-      position: absolute;
-      right: 4vw;
-      bottom: 5.5vh;
-      text-align: right
+      text-align: right;
+      flex: none;
+      padding-bottom: .4vh
+    }
+
+    .clock .cdlabel {
+      font-size: clamp(10px, 1vw, 14px);
+      letter-spacing: .24em;
+      text-transform: uppercase;
+      font-weight: 700;
+      opacity: .72;
+      display: none
+    }
+
+    .clock .cd {
+      font-size: clamp(30px, 4.6vw, 74px);
+      font-weight: 800;
+      line-height: 1.05;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -.02em;
+      display: none;
+      white-space: nowrap
     }
 
     .clock .time {
-      font-size: clamp(30px, 4vw, 68px);
-      font-weight: 800;
-      line-height: 1;
-      font-variant-numeric: tabular-nums;
-      letter-spacing: -.02em
+      font-size: clamp(15px, 1.6vw, 24px);
+      font-weight: 600;
+      opacity: .82;
+      margin-top: .6vh;
+      font-variant-numeric: tabular-nums
+    }
+
+    .screen.busy .clock .cd,
+    .screen.busy .clock .cdlabel,
+    .screen.ending .clock .cd,
+    .screen.ending .clock .cdlabel {
+      display: block
     }
 
     .agenda {
@@ -185,7 +223,8 @@
       justify-content: space-between;
       align-items: baseline;
       border-bottom: 3px solid var(--ink);
-      padding-bottom: 1.4vh
+      padding-bottom: 1.4vh;
+      gap: 1vw
     }
 
     .agenda-head h3 {
@@ -196,11 +235,12 @@
     }
 
     .agenda-head .date {
-      font-size: clamp(12px, 1.2vw, 17px);
+      font-size: clamp(11px, 1.1vw, 16px);
       color: var(--muted);
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: .08em
+      letter-spacing: .06em;
+      text-align: right
     }
 
     #slots {
@@ -214,9 +254,11 @@
       display: grid;
       grid-template-columns: auto auto 1fr;
       align-items: baseline;
-      gap: 1.4vw;
-      padding: 1.9vh 0;
-      border-bottom: 1px solid var(--line)
+      gap: 1.2vw;
+      padding: 1.8vh .6vw;
+      border-bottom: 1px solid var(--line);
+      cursor: pointer;
+      transition: background .2s, opacity .2s
     }
 
     .slot::before {
@@ -228,20 +270,11 @@
     }
 
     .slot .stime {
-      font-size: clamp(17px, 2vw, 30px);
+      font-size: clamp(16px, 1.9vw, 28px);
       font-weight: 800;
       font-variant-numeric: tabular-nums;
       letter-spacing: -.01em;
       white-space: nowrap
-    }
-
-    .slot .stitle {
-      font-size: clamp(13px, 1.3vw, 19px);
-      font-weight: 600;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: .12em;
-      margin-top: .4vh
     }
 
     .slot .col2 {
@@ -249,21 +282,39 @@
       text-align: right
     }
 
-    .slot .stag {
-      font-size: clamp(10px, 1vw, 14px);
-      font-weight: 800;
+    .slot .sname {
+      font-size: clamp(13px, 1.35vw, 20px);
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: .16em;
-      color: var(--busy);
-      white-space: nowrap
+      letter-spacing: .05em;
+      line-height: 1.15
+    }
+
+    .slot .stitle {
+      display: none;
+      font-size: clamp(12px, 1.2vw, 17px);
+      color: var(--muted);
+      font-weight: 500;
+      margin-top: .4vh;
+      line-height: 1.2
+    }
+
+    .slot.reveal .stitle {
+      display: block
     }
 
     .slot.passed {
-      opacity: .38
+      opacity: .4
     }
 
-    .slot.live .stime {
+    .slot.live .stime,
+    .slot.live .sname {
       color: var(--busy)
+    }
+
+    .slot.live {
+      background: rgba(37, 99, 235, .08);
+      border-radius: 10px
     }
 
     .empty {
@@ -301,11 +352,11 @@
     }
 
     .conn-demo::before {
-      background: var(--soon)
+      background: var(--ending)
     }
 
     .conn-err::before {
-      background: var(--busy)
+      background: var(--ending)
     }
 
     @media (max-aspect-ratio:1/1) {
@@ -314,34 +365,50 @@
         grid-template-rows: 1.1fr 1fr
       }
 
-      .current {
-        max-width: none
+      .bottom {
+        flex-wrap: wrap;
+        gap: 1.5vh
       }
 
       .clock {
-        position: static;
-        text-align: left;
-        margin-top: 2vh
-      }
-
-      .status-wrap {
-        margin-top: 3vh
+        text-align: left
       }
     }
 
-    #gear {
+    /* kontrol pojok */
+    .corner-btn {
       position: fixed;
+      border: none;
+      cursor: pointer;
+      z-index: 25;
+      font-family: inherit;
+      background: rgba(20, 17, 14, .10);
+      color: rgba(20, 17, 14, .65);
+      backdrop-filter: blur(4px);
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 9px 16px
+    }
+
+    .corner-btn:hover {
+      background: rgba(20, 17, 14, .18)
+    }
+
+    #fsbtn {
+      right: 16px;
+      bottom: 16px
+    }
+
+    #gear {
       top: 14px;
       right: 14px;
       width: 38px;
       height: 38px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, .18);
-      color: #fff;
-      border: none;
-      cursor: pointer;
-      font-size: 18px;
-      z-index: 20
+      padding: 0;
+      font-size: 18px
     }
 
     #cfg {
@@ -445,16 +512,21 @@
       <div class="eyebrow">Ruang Meeting</div>
       <div class="room-name" id="roomName">Ruang</div>
       <div class="room-meta" id="roomMeta"></div>
-      <div class="status-wrap">
-        <div class="status"><span class="mk"></span><span id="statusText">—</span></div>
-        <div class="current">
-          <div class="label" id="curLabel">Sekarang</div>
-          <div class="title" id="curTitle">—</div>
-          <div class="sub" id="curSub"></div>
+
+      <div class="bottom">
+        <div class="status-wrap">
+          <div class="status"><span class="mk"></span><span id="statusText">—</span></div>
+          <div class="current">
+            <div class="label" id="curLabel">Sekarang</div>
+            <div class="title" id="curTitle">—</div>
+            <div class="sub" id="curSub"></div>
+          </div>
         </div>
-      </div>
-      <div class="clock">
-        <div class="time" id="clockTime">--:--</div>
+        <div class="clock">
+          <div class="cdlabel" id="cdLabel">Sisa waktu</div>
+          <div class="cd" id="countdown">--:--</div>
+          <div class="time" id="clockTime">--:--</div>
+        </div>
       </div>
     </section>
 
@@ -471,7 +543,8 @@
     </aside>
   </div>
 
-  <button id="gear" title="Pengaturan">&#9881;</button>
+  <button id="gear" class="corner-btn" title="Pengaturan">&#9881;</button>
+  <button id="fsbtn" class="corner-btn" title="Layar penuh">&#9974; Layar penuh</button>
 
   <div id="cfg">
     <div class="cfg-card">
@@ -486,9 +559,7 @@
         <button class="btn-cancel" id="btnCancel">Batal</button>
         <button class="btn-save" id="btnSave">Simpan</button>
       </div>
-      <div class="hint">Display memanggil backend Anda:
-        <code>{ room, now, events:[{title,organizer,start,end}] }</code>.
-        <code>{room}</code> diganti otomatis dengan room key.
+      <div class="hint">Display memanggil backend: <code>{ room, now, events:[{title,organizer,start,end}] }</code>.
       </div>
     </div>
   </div>
@@ -500,101 +571,116 @@
       room: params.get('room') || 'excellent',
       interval: parseInt(params.get('refresh') || '20', 10)
     };
+    const SOON_MS = 15 * 60 * 1000;
 
     function demoData() {
       const now = new Date();
       const at = (h, m) => { const d = new Date(now); d.setHours(h, m, 0, 0); return d.toISOString(); };
       return {
-        room: { key: cfg.room, name: 'Excellent', capacity: 4, location: 'Lantai 1' },
-        now: now.toISOString(),
+        room: { key: cfg.room, name: 'Excellent', capacity: 4, location: 'Lantai 1' }, now: now.toISOString(),
         events: [
           { title: 'Sprint Planning', organizer: 'Hansel', start: at(8, 30), end: at(11, 0) },
-          { title: 'Review Desain', organizer: 'Maya', start: at(13, 30), end: at(14, 0) },
-          { title: 'Weekly Sync', organizer: 'Dewi', start: at(15, 0), end: at(16, 0) }
+          { title: 'HR Interview', organizer: 'Jessica', start: at(13, 0), end: at(now.getHours(), now.getMinutes() + 10) },
+          { title: 'Weekly Sync', organizer: 'Dewi', start: at(16, 0), end: at(17, 0) }
         ]
       };
     }
 
-    let timer = null;
+    let timer = null, lastData = null, lastSig = '';
+
     async function fetchData() {
       if (!cfg.api) { render(demoData(), 'demo'); return; }
       try {
         const url = cfg.api.replace('{room}', encodeURIComponent(cfg.room));
         const res = await fetch(url, { cache: 'no-store' });
         if (!res.ok) throw new Error('HTTP ' + res.status);
-        const data = await res.json();
-        render(data, 'ok');
+        render(await res.json(), 'ok');
       } catch (e) { setConn('err', 'Gagal terhubung'); }
     }
 
     function fmt(d) { return new Date(d).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }); }
+    function pad(n) { return String(n).padStart(2, '0'); }
+    function fmtDur(ms) {
+      let s = Math.max(0, Math.floor(ms / 1000)); const h = Math.floor(s / 3600); s %= 3600; const m = Math.floor(s / 60); s %= 60;
+      return h > 0 ? h + ':' + pad(m) + ':' + pad(s) : pad(m) + ':' + pad(s);
+    }
+    function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 
     function render(data, mode) {
-      const now = new Date(data.now || Date.now());
+      lastData = data;
       document.getElementById('roomName').textContent = data.room?.name || cfg.room;
       const bits = [];
       if (data.room?.capacity) bits.push('Kapasitas ' + data.room.capacity);
       if (data.room?.location) bits.push(data.room.location);
-      document.getElementById('roomMeta').innerHTML = bits.map(b => '<span>' + b + '</span>').join('');
+      document.getElementById('roomMeta').innerHTML = bits.map(b => '<span>' + esc(b) + '</span>').join('');
 
-      const events = (data.events || [])
-        .map(e => ({ ...e, s: new Date(e.start), e2: new Date(e.end) }))
-        .sort((a, b) => a.s - b.s);
+      const events = (data.events || []).slice().sort((a, b) => new Date(a.start) - new Date(b.start));
+      const sig = JSON.stringify(events.map(e => [e.start, e.end, e.title, e.organizer]));
+      if (sig !== lastSig) { lastSig = sig; buildSlots(events); }
 
+      setConn(mode === 'ok' ? 'ok' : 'demo', mode === 'ok' ? 'Terhubung' : 'Mode demo');
+      document.getElementById('updatedAt').textContent = new Date().toLocaleTimeString('id-ID');
+      paint();
+    }
+
+    function buildSlots(events) {
+      const wrap = document.getElementById('slots'); wrap.innerHTML = '';
+      if (!events.length) { wrap.innerHTML = '<div class="empty">Belum ada booking hari ini.</div>'; return; }
+      events.forEach(ev => {
+        const div = document.createElement('div');
+        div.className = 'slot';
+        div.dataset.start = new Date(ev.start).getTime();
+        div.dataset.end = new Date(ev.end).getTime();
+        div.innerHTML = '<div class="stime">' + fmt(ev.start) + ' – ' + fmt(ev.end) + '</div>'
+          + '<div class="col2"><div class="sname">' + esc(ev.organizer || ev.title || 'Terpakai') + '</div>'
+          + '<div class="stitle">' + esc(ev.title || '') + '</div></div>';
+        div.onclick = () => div.classList.toggle('reveal');
+        wrap.appendChild(div);
+      });
+    }
+
+    function paint() {
+      if (!lastData) return;
+      const now = Date.now();
+      const events = (lastData.events || []).map(e => ({ ...e, s: new Date(e.start).getTime(), e2: new Date(e.end).getTime() })).sort((a, b) => a.s - b.s);
       const current = events.find(ev => now >= ev.s && now < ev.e2);
       const upcoming = events.filter(ev => ev.s > now);
-      const soon = upcoming[0] && (upcoming[0].s - now) <= 15 * 60 * 1000 ? upcoming[0] : null;
 
       const screen = document.getElementById('screen');
-      screen.classList.remove('free', 'busy', 'soon');
+      screen.classList.remove('free', 'busy', 'ending');
       const stt = document.getElementById('statusText');
       const curLabel = document.getElementById('curLabel');
       const curTitle = document.getElementById('curTitle');
       const curSub = document.getElementById('curSub');
+      const cd = document.getElementById('countdown');
 
       if (current) {
-        screen.classList.add('busy');
+        const remain = current.e2 - now;
+        screen.classList.add(remain <= SOON_MS ? 'ending' : 'busy');
         stt.textContent = 'DIPAKAI';
         curLabel.textContent = 'Sedang berlangsung';
         curTitle.textContent = current.title || 'Terpakai';
-        curSub.textContent = fmt(current.s) + ' – ' + fmt(current.e2) + ((current.organizer && current.organizer !== current.title) ? ' · ' + current.organizer : '');
-      } else if (soon) {
-        screen.classList.add('soon');
-        stt.textContent = 'SEGERA';
-        curLabel.textContent = 'Berikutnya';
-        curTitle.textContent = soon.title || 'Terpakai';
-        curSub.textContent = 'Mulai ' + fmt(soon.s) + ' – ' + fmt(soon.e2) + ((soon.organizer && soon.organizer !== soon.title) ? ' · ' + soon.organizer : '');
+        curSub.textContent = fmt(current.s) + ' – ' + fmt(current.e2) + (current.organizer ? ' · ' + current.organizer : '');
+        cd.textContent = fmtDur(remain);
       } else {
         screen.classList.add('free');
         stt.textContent = 'KOSONG';
         if (upcoming[0]) {
           curLabel.textContent = 'Booking berikutnya';
           curTitle.textContent = upcoming[0].title || 'Terpakai';
-          curSub.textContent = fmt(upcoming[0].s) + ' – ' + fmt(upcoming[0].e2) + ((upcoming[0].organizer && upcoming[0].organizer !== upcoming[0].title) ? ' · ' + upcoming[0].organizer : '');
+          curSub.textContent = fmt(upcoming[0].s) + ' – ' + fmt(upcoming[0].e2) + (upcoming[0].organizer ? ' · ' + upcoming[0].organizer : '');
         } else {
-          curLabel.textContent = 'Sisa hari ini';
+          // curLabel.textContent = 'Sisa hari ini';
           curTitle.textContent = 'Tidak ada jadwal';
           curSub.textContent = 'Ruangan tersedia';
         }
       }
 
-      const wrap = document.getElementById('slots');
-      wrap.innerHTML = '';
-      if (events.length === 0) {
-        wrap.innerHTML = '<div class="empty">Belum ada booking hari ini.</div>';
-      }
-      events.forEach(ev => {
-        const live = now >= ev.s && now < ev.e2;
-        const passed = ev.e2 <= now;
-        const div = document.createElement('div');
-        div.className = 'slot' + (passed ? ' passed' : '') + (live ? ' live' : '');
-        div.innerHTML = '<div class="stime">' + fmt(ev.s) + ' – ' + fmt(ev.e2) + '</div>'
-          + '<div class="col2"><div class="stitle">' + ((ev.title || 'Terpakai') + ((ev.organizer && ev.organizer !== ev.title) ? ' · ' + ev.organizer : '')) + '</div>' + (live ? '<div class="stag">Berlangsung</div>' : '') + '</div>';
-        wrap.appendChild(div);
+      document.querySelectorAll('#slots .slot').forEach(el => {
+        const s = +el.dataset.start, e = +el.dataset.end;
+        el.classList.toggle('live', now >= s && now < e);
+        el.classList.toggle('passed', e <= now);
       });
-
-      setConn(mode === 'ok' ? 'ok' : 'demo', mode === 'ok' ? 'Terhubung' : 'Mode demo');
-      document.getElementById('updatedAt').textContent = new Date().toLocaleTimeString('id-ID');
     }
 
     function setConn(state, label) {
@@ -603,20 +689,38 @@
       el.textContent = label;
     }
 
-    function tickClock() {
+    function tick() {
       const n = new Date();
-      document.getElementById('clockTime').textContent =
-        n.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-      document.getElementById('clockDate').textContent =
-        n.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+      document.getElementById('clockTime').textContent = n.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+      document.getElementById('clockDate').textContent = n.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+      paint();
     }
 
-    function startLoop() {
-      if (timer) clearInterval(timer);
-      fetchData();
-      timer = setInterval(fetchData, Math.max(5, cfg.interval) * 1000);
-    }
+    function startLoop() { if (timer) clearInterval(timer); fetchData(); timer = setInterval(fetchData, Math.max(5, cfg.interval) * 1000); }
 
+    // ---------- Fullscreen + anti-zoom ----------
+    const fsbtn = document.getElementById('fsbtn');
+    function isFs() { return document.fullscreenElement || document.webkitFullscreenElement; }
+    function toggleFs() {
+      if (isFs()) { (document.exitFullscreen || document.webkitExitFullscreen).call(document); }
+      else { const el = document.documentElement; (el.requestFullscreen || el.webkitRequestFullscreen).call(el).catch(() => { }); }
+    }
+    fsbtn.onclick = toggleFs;
+    function syncFsBtn() { fsbtn.innerHTML = isFs() ? '&#10005; Keluar' : '&#9974; Layar penuh'; }
+    document.addEventListener('fullscreenchange', syncFsBtn);
+    document.addEventListener('webkitfullscreenchange', syncFsBtn);
+    syncFsBtn();
+
+    // cegah zoom: ctrl+scroll, ctrl/cmd +/-/0, pinch (Safari gesture), double-tap
+    window.addEventListener('wheel', e => { if (e.ctrlKey) e.preventDefault(); }, { passive: false });
+    window.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && ['+', '-', '=', '0'].includes(e.key)) e.preventDefault();
+    }, { passive: false });
+    ['gesturestart', 'gesturechange', 'gestureend'].forEach(ev => document.addEventListener(ev, e => e.preventDefault()));
+    let lastTouch = 0;
+    document.addEventListener('touchend', e => { const t = Date.now(); if (t - lastTouch <= 300) e.preventDefault(); lastTouch = t; }, { passive: false });
+
+    // ---------- Pengaturan ----------
     const cfgEl = document.getElementById('cfg');
     document.getElementById('gear').onclick = () => {
       document.getElementById('inApi').value = cfg.api;
@@ -629,11 +733,10 @@
       cfg.api = document.getElementById('inApi').value.trim();
       cfg.room = document.getElementById('inRoom').value.trim() || 'excellent';
       cfg.interval = parseInt(document.getElementById('inInt').value, 10) || 20;
-      cfgEl.classList.remove('show');
-      startLoop();
+      cfgEl.classList.remove('show'); startLoop();
     };
 
-    tickClock(); setInterval(tickClock, 1000);
+    tick(); setInterval(tick, 1000);
     startLoop();
   </script>
 </body>
