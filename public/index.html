@@ -706,7 +706,7 @@
       else { const el = document.documentElement; (el.requestFullscreen || el.webkitRequestFullscreen).call(el).catch(() => { }); }
     }
     fsbtn.onclick = toggleFs;
-    function syncFsBtn() { fsbtn.innerHTML = isFs() ? '&#10005; Keluar' : '&#9974; Layar penuh'; }
+    function syncFsBtn() { fsbtn.innerHTML = isFs() ? '&#10005;' : '&#9974; Layar penuh'; }
     document.addEventListener('fullscreenchange', syncFsBtn);
     document.addEventListener('webkitfullscreenchange', syncFsBtn);
     syncFsBtn();
