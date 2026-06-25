@@ -282,7 +282,7 @@
       text-align: right
     }
 
-    .slot .sname {
+    .slot .stitle {
       font-size: clamp(13px, 1.35vw, 20px);
       font-weight: 700;
       text-transform: uppercase;
@@ -290,7 +290,7 @@
       line-height: 1.15
     }
 
-    .slot .stitle {
+    .slot .sname {
       display: none;
       font-size: clamp(12px, 1.2vw, 17px);
       color: var(--muted);
@@ -299,7 +299,7 @@
       line-height: 1.2
     }
 
-    .slot.reveal .stitle {
+    .slot.reveal .sname {
       display: block
     }
 
@@ -308,7 +308,7 @@
     }
 
     .slot.live .stime,
-    .slot.live .sname {
+    .slot.live .stitle {
       color: var(--busy)
     }
 
@@ -632,8 +632,8 @@
         div.dataset.start = new Date(ev.start).getTime();
         div.dataset.end = new Date(ev.end).getTime();
         div.innerHTML = '<div class="stime">' + fmt(ev.start) + ' – ' + fmt(ev.end) + '</div>'
-          + '<div class="col2"><div class="sname">' + esc(ev.organizer || ev.title || 'Terpakai') + '</div>'
-          + '<div class="stitle">' + esc(ev.title || '') + '</div></div>';
+          + '<div class="col2"><div class="stitle">' + esc(ev.title || ev.organizer || 'Terpakai') + '</div>'
+          + '<div class="sname">' + esc(ev.organizer || '') + '</div></div>';
         div.onclick = () => div.classList.toggle('reveal');
         wrap.appendChild(div);
       });
@@ -670,7 +670,7 @@
           curTitle.textContent = upcoming[0].title || 'Terpakai';
           curSub.textContent = fmt(upcoming[0].s) + ' – ' + fmt(upcoming[0].e2) + (upcoming[0].organizer ? ' · ' + upcoming[0].organizer : '');
         } else {
-          // curLabel.textContent = 'Sisa hari ini';
+          curLabel.textContent = 'Sisa hari ini';
           curTitle.textContent = 'Tidak ada jadwal';
           curSub.textContent = 'Ruangan tersedia';
         }
@@ -706,7 +706,7 @@
       else { const el = document.documentElement; (el.requestFullscreen || el.webkitRequestFullscreen).call(el).catch(() => { }); }
     }
     fsbtn.onclick = toggleFs;
-    function syncFsBtn() { fsbtn.innerHTML = isFs() ? '&#10005;' : '&#9974; Layar penuh'; }
+    function syncFsBtn() { fsbtn.innerHTML = isFs() ? '&#10005; Keluar' : '&#9974; Layar penuh'; }
     document.addEventListener('fullscreenchange', syncFsBtn);
     document.addEventListener('webkitfullscreenchange', syncFsBtn);
     syncFsBtn();
