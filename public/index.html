@@ -15,6 +15,7 @@
       --free: #15824B;
       --busy: #2563EB;
       --ending: #C5362F;
+      --soon: #D98A1F;
       --on: #FFFFFF;
     }
 
@@ -67,6 +68,10 @@
 
     .screen.ending .stage {
       background: var(--ending)
+    }
+
+    .screen.soon .stage {
+      background: var(--soon)
     }
 
     .eyebrow {
@@ -571,18 +576,28 @@
       room: params.get('room') || 'excellent',
       interval: parseInt(params.get('refresh') || '20', 10)
     };
-    const SOON_MS = 30 * 60 * 1000;
+    const demoState = params.get('demo');           // free | soon | busy | ending | cycle
+    if (demoState) { cfg.api = ''; if (demoState === 'cycle') cfg.interval = 5; }
+    const ENDING_MS = 15 * 60 * 1000;   // <=15 menit sebelum selesai -> merah
+    const STARTING_MS = 30 * 60 * 1000; // <=30 menit sebelum mulai (kosong) -> kuning
 
+    const DEMO_STATES = ['free', 'soon', 'busy', 'ending'];
+    function demoEvents(state) {
+      const min = (m) => new Date(Date.now() + m * 60000).toISOString();
+      switch (state) {
+        case 'soon': return [{ title: 'Sprint Planning', organizer: 'Hansel', start: min(12), end: min(72) }];
+        case 'busy': return [{ title: 'HR Interview', organizer: 'Jessica Ekaputri', start: min(-25), end: min(45) }];
+        case 'ending': return [{ title: 'Weekly Sync Tim', organizer: 'Dewi Rahmawati', start: min(-52), end: min(8) }];
+        case 'free':
+        default: return [{ title: 'Town Hall', organizer: 'Andre', start: min(150), end: min(210) }];
+      }
+    }
     function demoData() {
-      const now = new Date();
-      const at = (h, m) => { const d = new Date(now); d.setHours(h, m, 0, 0); return d.toISOString(); };
+      let st = (demoState && demoState !== 'cycle') ? demoState : 'free';
+      if (demoState === 'cycle') st = DEMO_STATES[Math.floor(Date.now() / 5000) % DEMO_STATES.length];
       return {
-        room: { key: cfg.room, name: 'Excellent', capacity: 4, location: 'Lantai 1' }, now: now.toISOString(),
-        events: [
-          { title: 'Sprint Planning', organizer: 'Hansel', start: at(8, 30), end: at(11, 0) },
-          { title: 'HR Interview', organizer: 'Jessica', start: at(13, 0), end: at(now.getHours(), now.getMinutes() + 10) },
-          { title: 'Weekly Sync', organizer: 'Dewi', start: at(16, 0), end: at(17, 0) }
-        ]
+        room: { key: cfg.room, name: 'Excellent', capacity: 4, location: 'Lantai 1' },
+        now: new Date().toISOString(), events: demoEvents(st)
       };
     }
 
@@ -656,20 +671,28 @@
 
       if (current) {
         const remain = current.e2 - now;
-        screen.classList.add(remain <= SOON_MS ? 'ending' : 'busy');
+        screen.classList.add(remain <= ENDING_MS ? 'ending' : 'busy');
         stt.textContent = 'DIPAKAI';
         curLabel.textContent = 'Sedang berlangsung';
         curTitle.textContent = current.title || 'Terpakai';
         curSub.textContent = fmt(current.s) + ' – ' + fmt(current.e2) + (current.organizer ? ' · ' + current.organizer : '');
         cd.textContent = fmtDur(remain);
       } else {
-        screen.classList.add('free');
-        stt.textContent = 'KOSONG';
-        if (upcoming[0]) {
+        const next = upcoming[0];
+        const soon = next && (next.s - now) <= STARTING_MS;
+        screen.classList.add(soon ? 'soon' : 'free');
+        if (soon) {
+          stt.textContent = 'SEGERA';
+          curLabel.textContent = 'Akan dipakai';
+          curTitle.textContent = next.title || 'Terpakai';
+          curSub.textContent = 'Mulai ' + fmt(next.s) + ' – ' + fmt(next.e2) + (next.organizer ? ' · ' + next.organizer : '');
+        } else if (next) {
+          stt.textContent = 'KOSONG';
           curLabel.textContent = 'Booking berikutnya';
-          curTitle.textContent = upcoming[0].title || 'Terpakai';
-          curSub.textContent = fmt(upcoming[0].s) + ' – ' + fmt(upcoming[0].e2) + (upcoming[0].organizer ? ' · ' + upcoming[0].organizer : '');
+          curTitle.textContent = next.title || 'Terpakai';
+          curSub.textContent = fmt(next.s) + ' – ' + fmt(next.e2) + (next.organizer ? ' · ' + next.organizer : '');
         } else {
+          stt.textContent = 'KOSONG';
           curLabel.textContent = 'Sisa hari ini';
           curTitle.textContent = 'Tidak ada jadwal';
           curSub.textContent = 'Ruangan tersedia';
