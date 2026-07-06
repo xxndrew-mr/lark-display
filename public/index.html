@@ -7,6 +7,9 @@
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
   <title>Display Ruang Meeting</title>
   <style>
+    /* ============================================================
+       Variabel & reset
+       ============================================================ */
     :root {
       --paper: #F3F1EA;
       --ink: #14110E;
@@ -22,13 +25,13 @@
     * {
       box-sizing: border-box;
       margin: 0;
-      padding: 0
+      padding: 0;
     }
 
     html,
     body {
       height: 100%;
-      touch-action: manipulation
+      touch-action: manipulation;
     }
 
     body {
@@ -37,15 +40,21 @@
       color: var(--ink);
       overflow: hidden;
       user-select: none;
-      -webkit-font-smoothing: antialiased
+      -webkit-font-smoothing: antialiased;
     }
 
+    /* ============================================================
+       Layout dua panel: status (kiri) + agenda (kanan)
+       ============================================================ */
     .screen {
       height: 100vh;
       display: grid;
-      grid-template-columns: 1.35fr 1fr
+      grid-template-columns: 1.35fr 1fr;
     }
 
+    /* ============================================================
+       Panel status — warna latar mengikuti status ruangan
+       ============================================================ */
     .stage {
       position: relative;
       padding: 5.5vh 4vw;
@@ -55,23 +64,23 @@
       background: #222;
       transition: background .6s ease;
       min-width: 0;
-      overflow: hidden
+      overflow: hidden;
     }
 
     .screen.free .stage {
-      background: var(--free)
+      background: var(--free);
     }
 
     .screen.busy .stage {
-      background: var(--busy)
+      background: var(--busy);
     }
 
     .screen.ending .stage {
-      background: var(--ending)
+      background: var(--ending);
     }
 
     .screen.soon .stage {
-      background: var(--soon)
+      background: var(--soon);
     }
 
     .eyebrow {
@@ -79,7 +88,7 @@
       letter-spacing: .32em;
       text-transform: uppercase;
       font-weight: 700;
-      opacity: .72
+      opacity: .72;
     }
 
     .room-name {
@@ -87,7 +96,7 @@
       font-weight: 800;
       line-height: .95;
       letter-spacing: -.02em;
-      margin-top: 1.4vh
+      margin-top: 1.4vh;
     }
 
     .room-meta {
@@ -97,11 +106,11 @@
       margin-top: 1.4vh;
       display: flex;
       gap: 1.4vw;
-      flex-wrap: wrap
+      flex-wrap: wrap;
     }
 
     .room-meta span {
-      position: relative
+      position: relative;
     }
 
     .room-meta span+span::before {
@@ -112,21 +121,23 @@
       bottom: .15em;
       width: 1px;
       background: currentColor;
-      opacity: .4
+      opacity: .4;
     }
 
-    /* baris bawah: status (kiri) + countdown/jam (kanan) — tidak bertumpuk */
+    /* ============================================================
+       Baris bawah: status (kiri) + countdown/jam (kanan)
+       ============================================================ */
     .bottom {
       margin-top: auto;
       display: flex;
       align-items: flex-end;
       justify-content: space-between;
-      gap: 3vw
+      gap: 3vw;
     }
 
     .status-wrap {
       min-width: 0;
-      flex: 1
+      flex: 1;
     }
 
     .status {
@@ -136,7 +147,7 @@
       font-size: clamp(44px, 7.6vw, 140px);
       font-weight: 800;
       letter-spacing: -.02em;
-      line-height: .92
+      line-height: .92;
     }
 
     .status .mk {
@@ -144,13 +155,13 @@
       height: clamp(15px, 1.6vw, 28px);
       border-radius: 50%;
       background: var(--on);
-      flex: none
+      flex: none;
     }
 
     .current {
       margin-top: 2vh;
       border-top: 2px solid rgba(255, 255, 255, .35);
-      padding-top: 2vh
+      padding-top: 2vh;
     }
 
     .current .label {
@@ -158,14 +169,14 @@
       letter-spacing: .28em;
       text-transform: uppercase;
       font-weight: 700;
-      opacity: .72
+      opacity: .72;
     }
 
     .current .title {
       font-size: clamp(20px, 2.7vw, 42px);
       font-weight: 700;
       margin-top: .6vh;
-      line-height: 1.05
+      line-height: 1.05;
     }
 
     .current .sub {
@@ -173,13 +184,14 @@
       font-weight: 500;
       opacity: .85;
       margin-top: .7vh;
-      font-variant-numeric: tabular-nums
+      font-variant-numeric: tabular-nums;
     }
 
+    /* Countdown hanya tampil saat DIPAKAI / hampir selesai */
     .clock {
       text-align: right;
       flex: none;
-      padding-bottom: .4vh
+      padding-bottom: .4vh;
     }
 
     .clock .cdlabel {
@@ -188,7 +200,7 @@
       text-transform: uppercase;
       font-weight: 700;
       opacity: .72;
-      display: none
+      display: none;
     }
 
     .clock .cd {
@@ -198,7 +210,7 @@
       font-variant-numeric: tabular-nums;
       letter-spacing: -.02em;
       display: none;
-      white-space: nowrap
+      white-space: nowrap;
     }
 
     .clock .time {
@@ -206,21 +218,24 @@
       font-weight: 600;
       opacity: .82;
       margin-top: .6vh;
-      font-variant-numeric: tabular-nums
+      font-variant-numeric: tabular-nums;
     }
 
     .screen.busy .clock .cd,
     .screen.busy .clock .cdlabel,
     .screen.ending .clock .cd,
     .screen.ending .clock .cdlabel {
-      display: block
+      display: block;
     }
 
+    /* ============================================================
+       Panel agenda — jadwal hari ini
+       ============================================================ */
     .agenda {
       padding: 5.5vh 3vw;
       display: flex;
       flex-direction: column;
-      min-width: 0
+      min-width: 0;
     }
 
     .agenda-head {
@@ -229,14 +244,14 @@
       align-items: baseline;
       border-bottom: 3px solid var(--ink);
       padding-bottom: 1.4vh;
-      gap: 1vw
+      gap: 1vw;
     }
 
     .agenda-head h3 {
       font-size: clamp(13px, 1.4vw, 20px);
       letter-spacing: .26em;
       text-transform: uppercase;
-      font-weight: 800
+      font-weight: 800;
     }
 
     .agenda-head .date {
@@ -245,13 +260,13 @@
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: .06em;
-      text-align: right
+      text-align: right;
     }
 
     #slots {
       margin-top: 1vh;
       overflow: hidden;
-      counter-reset: slot
+      counter-reset: slot;
     }
 
     .slot {
@@ -263,7 +278,7 @@
       padding: 1.8vh .6vw;
       border-bottom: 1px solid var(--line);
       cursor: pointer;
-      transition: background .2s, opacity .2s
+      transition: background .2s, opacity .2s;
     }
 
     .slot::before {
@@ -271,7 +286,7 @@
       font-size: clamp(12px, 1.2vw, 18px);
       font-weight: 700;
       color: var(--muted);
-      font-variant-numeric: tabular-nums
+      font-variant-numeric: tabular-nums;
     }
 
     .slot .stime {
@@ -279,12 +294,12 @@
       font-weight: 800;
       font-variant-numeric: tabular-nums;
       letter-spacing: -.01em;
-      white-space: nowrap
+      white-space: nowrap;
     }
 
     .slot .col2 {
       min-width: 0;
-      text-align: right
+      text-align: right;
     }
 
     .slot .stitle {
@@ -292,43 +307,45 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: .05em;
-      line-height: 1.15
+      line-height: 1.15;
     }
 
+    /* Nama pemesan disembunyikan; tap slot untuk menampilkan */
     .slot .sname {
       display: none;
       font-size: clamp(12px, 1.2vw, 17px);
       color: var(--muted);
       font-weight: 500;
       margin-top: .4vh;
-      line-height: 1.2
+      line-height: 1.2;
     }
 
     .slot.reveal .sname {
-      display: block
+      display: block;
     }
 
     .slot.passed {
-      opacity: .4
+      opacity: .4;
     }
 
     .slot.live .stime,
     .slot.live .stitle {
-      color: var(--busy)
+      color: var(--busy);
     }
 
     .slot.live {
       background: rgba(37, 99, 235, .08);
-      border-radius: 10px
+      border-radius: 10px;
     }
 
     .empty {
       padding: 2.4vh 0;
       color: var(--muted);
       font-size: clamp(15px, 1.6vw, 22px);
-      font-weight: 600
+      font-weight: 600;
     }
 
+    /* Footer agenda: indikator koneksi + jam pembaruan */
     .agenda-foot {
       margin-top: auto;
       padding-top: 1.6vh;
@@ -337,7 +354,7 @@
       align-items: center;
       font-size: clamp(10px, 1vw, 14px);
       color: var(--muted);
-      letter-spacing: .04em
+      letter-spacing: .04em;
     }
 
     .conn-ok::before,
@@ -349,38 +366,43 @@
       height: .7em;
       border-radius: 50%;
       margin-right: .5em;
-      vertical-align: .02em
+      vertical-align: .02em;
     }
 
     .conn-ok::before {
-      background: var(--free)
+      background: var(--free);
     }
 
     .conn-demo::before {
-      background: var(--ending)
+      background: var(--soon);
     }
 
     .conn-err::before {
-      background: var(--ending)
+      background: var(--ending);
     }
 
+    /* ============================================================
+       Orientasi portrait: panel bertumpuk atas-bawah
+       ============================================================ */
     @media (max-aspect-ratio:1/1) {
       .screen {
         grid-template-columns: 1fr;
-        grid-template-rows: 1.1fr 1fr
+        grid-template-rows: 1.1fr 1fr;
       }
 
       .bottom {
         flex-wrap: wrap;
-        gap: 1.5vh
+        gap: 1.5vh;
       }
 
       .clock {
-        text-align: left
+        text-align: left;
       }
     }
 
-    /* kontrol pojok */
+    /* ============================================================
+       Tombol pojok (pengaturan & layar penuh)
+       ============================================================ */
     .corner-btn {
       position: fixed;
       border: none;
@@ -395,16 +417,16 @@
       font-weight: 700;
       letter-spacing: .05em;
       text-transform: uppercase;
-      padding: 5px 10px
+      padding: 5px 10px;
     }
 
     .corner-btn:hover {
-      background: rgba(20, 17, 14, .18)
+      background: rgba(20, 17, 14, .18);
     }
 
     #fsbtn {
       right: 12px;
-      bottom: 12px
+      bottom: 12px;
     }
 
     #gear {
@@ -413,9 +435,12 @@
       width: 28px;
       height: 28px;
       padding: 0;
-      font-size: 14px
+      font-size: 14px;
     }
 
+    /* ============================================================
+       Modal pengaturan
+       ============================================================ */
     #cfg {
       position: fixed;
       inset: 0;
@@ -423,11 +448,11 @@
       display: none;
       align-items: center;
       justify-content: center;
-      z-index: 30
+      z-index: 30;
     }
 
     #cfg.show {
-      display: flex
+      display: flex;
     }
 
     .cfg-card {
@@ -435,14 +460,14 @@
       border-radius: 8px;
       padding: 30px;
       width: min(520px, 92vw);
-      border: 2px solid var(--ink)
+      border: 2px solid var(--ink);
     }
 
     .cfg-card h2 {
       font-size: 20px;
       margin-bottom: 8px;
       letter-spacing: .04em;
-      text-transform: uppercase
+      text-transform: uppercase;
     }
 
     .cfg-card label {
@@ -452,7 +477,7 @@
       margin: 14px 0 4px;
       text-transform: uppercase;
       letter-spacing: .12em;
-      font-weight: 700
+      font-weight: 700;
     }
 
     .cfg-card input {
@@ -463,14 +488,14 @@
       background: #fff;
       color: var(--ink);
       font-size: 14px;
-      font-family: inherit
+      font-family: inherit;
     }
 
     .cfg-card .row {
       display: flex;
       gap: 14px;
       margin-top: 24px;
-      justify-content: flex-end
+      justify-content: flex-end;
     }
 
     .cfg-card button {
@@ -482,37 +507,39 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: .08em;
-      font-family: inherit
+      font-family: inherit;
     }
 
     .btn-save {
       background: var(--ink);
-      color: #fff
+      color: #fff;
     }
 
     .btn-cancel {
       background: transparent;
       color: var(--muted);
-      border: 1px solid var(--line)
+      border: 1px solid var(--line);
     }
 
     .hint {
       font-size: 12px;
       color: var(--muted);
       margin-top: 16px;
-      line-height: 1.6
+      line-height: 1.6;
     }
 
     .hint code {
       background: rgba(20, 17, 14, .06);
       padding: 1px 5px;
-      border-radius: 3px
+      border-radius: 3px;
     }
   </style>
 </head>
 
 <body>
   <div class="screen" id="screen">
+
+    <!-- Panel status: nama ruangan, status besar, meeting berjalan, jam -->
     <section class="stage">
       <div class="eyebrow">Ruang Meeting</div>
       <div class="room-name" id="roomName">Ruang</div>
@@ -535,6 +562,7 @@
       </div>
     </section>
 
+    <!-- Panel agenda: daftar jadwal hari ini -->
     <aside class="agenda">
       <div class="agenda-head">
         <h3>Jadwal Hari Ini</h3>
@@ -548,9 +576,11 @@
     </aside>
   </div>
 
+  <!-- Tombol pojok -->
   <button id="gear" class="corner-btn" title="Pengaturan">&#9881;</button>
   <button id="fsbtn" class="corner-btn" title="Layar penuh">&#9974; Layar penuh</button>
 
+  <!-- Modal pengaturan -->
   <div id="cfg">
     <div class="cfg-card">
       <h2>Pengaturan Display</h2>
@@ -570,196 +600,231 @@
   </div>
 
   <script>
+    // ---------- Konfigurasi ----------
     const params = new URLSearchParams(location.search);
     const cfg = {
       api: params.get('api') || '/api/room/{room}/today',
       room: params.get('room') || 'excellent',
-      interval: parseInt(params.get('refresh') || '20', 10)
+      interval: parseInt(params.get('refresh'), 10) || 20
     };
-    const demoState = params.get('demo');           // free | soon | busy | ending | cycle
-    if (demoState) { cfg.api = ''; if (demoState === 'cycle') cfg.interval = 5; }
-    const ENDING_MS = 15 * 60 * 1000;   // <=15 menit sebelum selesai -> merah
-    const STARTING_MS = 30 * 60 * 1000; // <=30 menit sebelum mulai (kosong) -> kuning
 
+    // ?demo=<free|soon|busy|ending|cycle> memaksa data contoh tanpa backend
+    const demoState = params.get('demo');
+    if (demoState) { cfg.api = ''; if (demoState === 'cycle') cfg.interval = 5; }
+
+    const ENDING_MS = 15 * 60 * 1000;    // sisa <=15 menit -> merah
+    const STARTING_MS = 30 * 60 * 1000;  // mulai <=30 menit lagi -> kuning
+    const FETCH_TIMEOUT_MS = 10000;
+
+    // ---------- Utilitas ----------
+    const $ = id => document.getElementById(id);
+    const pad = n => String(n).padStart(2, '0');
+    const fmt = d => new Date(d).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+    function fmtDur(ms) {
+      let s = Math.max(0, Math.floor(ms / 1000));
+      const h = Math.floor(s / 3600); s %= 3600;
+      const m = Math.floor(s / 60); s %= 60;
+      return h > 0 ? h + ':' + pad(m) + ':' + pad(s) : pad(m) + ':' + pad(s);
+    }
+
+    // "09:00 – 10:00 · Andre" (organizer & prefix opsional)
+    const jamRange = (startMs, endMs, organizer, prefix = '') =>
+      prefix + fmt(startMs) + ' – ' + fmt(endMs) + (organizer ? ' · ' + organizer : '');
+
+    // ---------- Data contoh (mode demo) ----------
     const DEMO_STATES = ['free', 'soon', 'busy', 'ending'];
     function demoEvents(state) {
-      const min = (m) => new Date(Date.now() + m * 60000).toISOString();
+      const min = m => new Date(Date.now() + m * 60000).toISOString();
       switch (state) {
         case 'soon': return [{ title: 'Sprint Planning', organizer: 'Hansel', start: min(12), end: min(72) }];
         case 'busy': return [{ title: 'HR Interview', organizer: 'Jessica Ekaputri', start: min(-25), end: min(45) }];
         case 'ending': return [{ title: 'Weekly Sync Tim', organizer: 'Dewi Rahmawati', start: min(-52), end: min(8) }];
-        case 'free':
         default: return [{ title: 'Town Hall', organizer: 'Andre', start: min(150), end: min(210) }];
       }
     }
     function demoData() {
-      let st = (demoState && demoState !== 'cycle') ? demoState : 'free';
-      if (demoState === 'cycle') st = DEMO_STATES[Math.floor(Date.now() / 5000) % DEMO_STATES.length];
+      let state = (demoState && demoState !== 'cycle') ? demoState : 'free';
+      if (demoState === 'cycle') state = DEMO_STATES[Math.floor(Date.now() / 5000) % DEMO_STATES.length];
       return {
         room: { key: cfg.room, name: 'Excellent', capacity: 4, location: 'Lantai 1' },
-        now: new Date().toISOString(), events: demoEvents(st)
+        now: new Date().toISOString(),
+        events: demoEvents(state)
       };
     }
 
-    let timer = null, lastData = null, lastSig = '';
+    // ---------- Ambil data ----------
+    let timer = null, lastData = null, lastSig = '', fetchSeq = 0;
 
     async function fetchData() {
       if (!cfg.api) { render(demoData(), 'demo'); return; }
+      const seq = ++fetchSeq;   // hanya respons terbaru yang boleh dipakai (anti-balapan)
       try {
         const url = cfg.api.replace('{room}', encodeURIComponent(cfg.room));
-        const res = await fetch(url, { cache: 'no-store' });
+        const res = await fetch(url, {
+          cache: 'no-store',
+          signal: (typeof AbortSignal !== 'undefined' && AbortSignal.timeout) ? AbortSignal.timeout(FETCH_TIMEOUT_MS) : undefined
+        });
         if (!res.ok) throw new Error('HTTP ' + res.status);
-        render(await res.json(), 'ok');
-      } catch (e) { setConn('err', 'Gagal terhubung'); }
+        const data = await res.json();
+        if (seq === fetchSeq) render(data, 'ok');
+      } catch (e) {
+        if (seq === fetchSeq) setConn('err', 'Gagal terhubung');
+      }
     }
 
-    function fmt(d) { return new Date(d).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }); }
-    function pad(n) { return String(n).padStart(2, '0'); }
-    function fmtDur(ms) {
-      let s = Math.max(0, Math.floor(ms / 1000)); const h = Math.floor(s / 3600); s %= 3600; const m = Math.floor(s / 60); s %= 60;
-      return h > 0 ? h + ':' + pad(m) + ':' + pad(s) : pad(m) + ':' + pad(s);
-    }
-    function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
-
+    // ---------- Render ----------
     function render(data, mode) {
       lastData = data;
-      document.getElementById('roomName').textContent = data.room?.name || cfg.room;
-      const bits = [];
-      if (data.room?.capacity) bits.push('Kapasitas ' + data.room.capacity);
-      if (data.room?.location) bits.push(data.room.location);
-      document.getElementById('roomMeta').innerHTML = bits.map(b => '<span>' + esc(b) + '</span>').join('');
+      $('roomName').textContent = data.room?.name || cfg.room;
+
+      const meta = [];
+      if (data.room?.capacity) meta.push('Kapasitas ' + data.room.capacity);
+      if (data.room?.location) meta.push(data.room.location);
+      $('roomMeta').innerHTML = meta.map(m => '<span>' + esc(m) + '</span>').join('');
 
       const events = (data.events || []).slice().sort((a, b) => new Date(a.start) - new Date(b.start));
       const sig = JSON.stringify(events.map(e => [e.start, e.end, e.title, e.organizer]));
-      if (sig !== lastSig) { lastSig = sig; buildSlots(events); }
+      if (sig !== lastSig) { lastSig = sig; buildSlots(events); }   // bangun ulang hanya bila jadwal berubah
 
-      setConn(mode === 'ok' ? 'ok' : 'demo', mode === 'ok' ? 'Terhubung' : 'Mode demo');
-      document.getElementById('updatedAt').textContent = new Date().toLocaleTimeString('id-ID');
+      setConn(mode, mode === 'ok' ? 'Terhubung' : 'Mode demo');
+      $('updatedAt').textContent = new Date().toLocaleTimeString('id-ID');
       paint();
     }
 
     function buildSlots(events) {
-      const wrap = document.getElementById('slots'); wrap.innerHTML = '';
+      const wrap = $('slots');
       if (!events.length) { wrap.innerHTML = '<div class="empty">Belum ada booking hari ini.</div>'; return; }
+      wrap.innerHTML = '';
       events.forEach(ev => {
-        const div = document.createElement('div');
-        div.className = 'slot';
-        div.dataset.start = new Date(ev.start).getTime();
-        div.dataset.end = new Date(ev.end).getTime();
-        div.innerHTML = '<div class="stime">' + fmt(ev.start) + ' – ' + fmt(ev.end) + '</div>'
-          + '<div class="col2"><div class="stitle">' + esc(ev.title || ev.organizer || 'Terpakai') + '</div>'
-          + '<div class="sname">' + esc(ev.organizer || '') + '</div></div>';
-        div.onclick = () => div.classList.toggle('reveal');
-        wrap.appendChild(div);
+        const slot = document.createElement('div');
+        slot.className = 'slot';
+        slot.dataset.start = new Date(ev.start).getTime();
+        slot.dataset.end = new Date(ev.end).getTime();
+        slot.innerHTML =
+          '<div class="stime">' + fmt(ev.start) + ' – ' + fmt(ev.end) + '</div>' +
+          '<div class="col2">' +
+          '<div class="stitle">' + esc(ev.title || ev.organizer || 'Terpakai') + '</div>' +
+          '<div class="sname">' + esc(ev.organizer || '') + '</div></div>';
+        slot.onclick = () => slot.classList.toggle('reveal');
+        wrap.appendChild(slot);
       });
     }
 
+    // ---------- Status ruangan & jam ----------
     function paint() {
       if (!lastData) return;
       const now = Date.now();
-      const events = (lastData.events || []).map(e => ({ ...e, s: new Date(e.start).getTime(), e2: new Date(e.end).getTime() })).sort((a, b) => a.s - b.s);
-      const current = events.find(ev => now >= ev.s && now < ev.e2);
-      const upcoming = events.filter(ev => ev.s > now);
+      const events = (lastData.events || [])
+        .map(ev => ({ ...ev, startMs: +new Date(ev.start), endMs: +new Date(ev.end) }))
+        .sort((a, b) => a.startMs - b.startMs);
+      const current = events.find(ev => now >= ev.startMs && now < ev.endMs);
+      const next = events.find(ev => ev.startMs > now);
 
-      const screen = document.getElementById('screen');
-      screen.classList.remove('free', 'busy', 'ending');
-      const stt = document.getElementById('statusText');
-      const curLabel = document.getElementById('curLabel');
-      const curTitle = document.getElementById('curTitle');
-      const curSub = document.getElementById('curSub');
-      const cd = document.getElementById('countdown');
+      const screen = $('screen');
+      screen.classList.remove('free', 'busy', 'ending', 'soon');
 
       if (current) {
-        const remain = current.e2 - now;
+        const remain = current.endMs - now;
         screen.classList.add(remain <= ENDING_MS ? 'ending' : 'busy');
-        stt.textContent = 'DIPAKAI';
-        curLabel.textContent = 'Sedang berlangsung';
-        curTitle.textContent = current.title || 'Terpakai';
-        curSub.textContent = fmt(current.s) + ' – ' + fmt(current.e2) + (current.organizer ? ' · ' + current.organizer : '');
-        cd.textContent = fmtDur(remain);
+        setStatus('DIPAKAI', 'Sedang berlangsung', current.title || 'Terpakai',
+          jamRange(current.startMs, current.endMs, current.organizer));
+        $('countdown').textContent = fmtDur(remain);
+      } else if (next && next.startMs - now <= STARTING_MS) {
+        screen.classList.add('soon');
+        setStatus('SEGERA', 'Akan dipakai', next.title || 'Terpakai',
+          jamRange(next.startMs, next.endMs, next.organizer, 'Mulai '));
+      } else if (next) {
+        screen.classList.add('free');
+        setStatus('KOSONG', 'Booking berikutnya', next.title || 'Terpakai',
+          jamRange(next.startMs, next.endMs, next.organizer));
       } else {
-        const next = upcoming[0];
-        const soon = next && (next.s - now) <= STARTING_MS;
-        screen.classList.add(soon ? 'soon' : 'free');
-        if (soon) {
-          stt.textContent = 'SEGERA';
-          curLabel.textContent = 'Akan dipakai';
-          curTitle.textContent = next.title || 'Terpakai';
-          curSub.textContent = 'Mulai ' + fmt(next.s) + ' – ' + fmt(next.e2) + (next.organizer ? ' · ' + next.organizer : '');
-        } else if (next) {
-          stt.textContent = 'KOSONG';
-          curLabel.textContent = 'Booking berikutnya';
-          curTitle.textContent = next.title || 'Terpakai';
-          curSub.textContent = fmt(next.s) + ' – ' + fmt(next.e2) + (next.organizer ? ' · ' + next.organizer : '');
-        } else {
-          stt.textContent = 'KOSONG';
-          curLabel.textContent = 'Sisa hari ini';
-          curTitle.textContent = 'Tidak ada jadwal';
-          curSub.textContent = 'Ruangan tersedia';
-        }
+        screen.classList.add('free');
+        setStatus('KOSONG', 'Sisa hari ini', 'Tidak ada jadwal', 'Ruangan tersedia');
       }
 
       document.querySelectorAll('#slots .slot').forEach(el => {
-        const s = +el.dataset.start, e = +el.dataset.end;
-        el.classList.toggle('live', now >= s && now < e);
-        el.classList.toggle('passed', e <= now);
+        const start = +el.dataset.start, end = +el.dataset.end;
+        el.classList.toggle('live', now >= start && now < end);
+        el.classList.toggle('passed', end <= now);
       });
     }
 
+    function setStatus(status, label, title, sub) {
+      $('statusText').textContent = status;
+      $('curLabel').textContent = label;
+      $('curTitle').textContent = title;
+      $('curSub').textContent = sub;
+    }
+
     function setConn(state, label) {
-      const el = document.getElementById('conn');
+      const el = $('conn');
       el.className = state === 'ok' ? 'conn-ok' : state === 'err' ? 'conn-err' : 'conn-demo';
       el.textContent = label;
     }
 
     function tick() {
-      const n = new Date();
-      document.getElementById('clockTime').textContent = n.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-      document.getElementById('clockDate').textContent = n.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+      const now = new Date();
+      $('clockTime').textContent = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+      $('clockDate').textContent = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
       paint();
     }
 
-    function startLoop() { if (timer) clearInterval(timer); fetchData(); timer = setInterval(fetchData, Math.max(5, cfg.interval) * 1000); }
+    function startLoop() {
+      if (timer) clearInterval(timer);
+      fetchData();
+      timer = setInterval(fetchData, Math.max(5, cfg.interval) * 1000);
+    }
 
-    // ---------- Fullscreen + anti-zoom ----------
-    const fsbtn = document.getElementById('fsbtn');
-    function isFs() { return document.fullscreenElement || document.webkitFullscreenElement; }
+    // ---------- Layar penuh & anti-zoom ----------
+    const fsbtn = $('fsbtn');
+    const isFs = () => document.fullscreenElement || document.webkitFullscreenElement;
     function toggleFs() {
-      if (isFs()) { (document.exitFullscreen || document.webkitExitFullscreen).call(document); }
-      else { const el = document.documentElement; (el.requestFullscreen || el.webkitRequestFullscreen).call(el).catch(() => { }); }
+      const el = document.documentElement;
+      const req = isFs()
+        ? (document.exitFullscreen || document.webkitExitFullscreen).call(document)
+        : (el.requestFullscreen || el.webkitRequestFullscreen).call(el);
+      if (req && req.catch) req.catch(() => { });   // WebKit lama mengembalikan undefined, bukan Promise
     }
     fsbtn.onclick = toggleFs;
-    function syncFsBtn() { fsbtn.innerHTML = isFs() ? '&#10005; Keluar' : '&#9974; Layar penuh'; }
+    const syncFsBtn = () => { fsbtn.innerHTML = isFs() ? '&#10005; Keluar' : '&#9974; Layar penuh'; };
     document.addEventListener('fullscreenchange', syncFsBtn);
     document.addEventListener('webkitfullscreenchange', syncFsBtn);
     syncFsBtn();
 
-    // cegah zoom: ctrl+scroll, ctrl/cmd +/-/0, pinch (Safari gesture), double-tap
+    // Cegah zoom di kiosk: ctrl+scroll, ctrl/cmd +/-/0, pinch (gesture Safari), double-tap
     window.addEventListener('wheel', e => { if (e.ctrlKey) e.preventDefault(); }, { passive: false });
     window.addEventListener('keydown', e => {
       if ((e.ctrlKey || e.metaKey) && ['+', '-', '=', '0'].includes(e.key)) e.preventDefault();
     }, { passive: false });
     ['gesturestart', 'gesturechange', 'gestureend'].forEach(ev => document.addEventListener(ev, e => e.preventDefault()));
     let lastTouch = 0;
-    document.addEventListener('touchend', e => { const t = Date.now(); if (t - lastTouch <= 300) e.preventDefault(); lastTouch = t; }, { passive: false });
+    document.addEventListener('touchend', e => {
+      const t = Date.now();
+      if (t - lastTouch <= 300) e.preventDefault();
+      lastTouch = t;
+    }, { passive: false });
 
     // ---------- Pengaturan ----------
-    const cfgEl = document.getElementById('cfg');
-    document.getElementById('gear').onclick = () => {
-      document.getElementById('inApi').value = cfg.api;
-      document.getElementById('inRoom').value = cfg.room;
-      document.getElementById('inInt').value = cfg.interval;
+    const cfgEl = $('cfg');
+    $('gear').onclick = () => {
+      $('inApi').value = cfg.api;
+      $('inRoom').value = cfg.room;
+      $('inInt').value = cfg.interval;
       cfgEl.classList.add('show');
     };
-    document.getElementById('btnCancel').onclick = () => cfgEl.classList.remove('show');
-    document.getElementById('btnSave').onclick = () => {
-      cfg.api = document.getElementById('inApi').value.trim();
-      cfg.room = document.getElementById('inRoom').value.trim() || 'excellent';
-      cfg.interval = parseInt(document.getElementById('inInt').value, 10) || 20;
-      cfgEl.classList.remove('show'); startLoop();
+    $('btnCancel').onclick = () => cfgEl.classList.remove('show');
+    $('btnSave').onclick = () => {
+      cfg.api = $('inApi').value.trim();
+      cfg.room = $('inRoom').value.trim() || 'excellent';
+      cfg.interval = parseInt($('inInt').value, 10) || 20;
+      cfgEl.classList.remove('show');
+      startLoop();
     };
 
-    tick(); setInterval(tick, 1000);
+    tick();
+    setInterval(tick, 1000);
     startLoop();
   </script>
 </body>

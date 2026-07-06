@@ -17,17 +17,15 @@ tablet/refresh berbagi satu panggilan ke Lark (hemat & cepat).
 
 | File | Fungsi |
 |---|---|
-| `lib/config.js` | **Daftar ruangan** (nama, kapasitas, lokasi, `calendar_id`). Satu-satunya tempat edit ruangan. |
+| `lib/config.js` | **Daftar ruangan** (nama, kapasitas, lokasi, `room_id`). Satu-satunya tempat edit ruangan. |
 | `lib/lark.js` | Logika Lark: ambil token + tarik event. |
 | `api/room/[key]/today.js` | Fungsi Vercel: `GET /api/room/<key>/today`. |
 | `api/rooms.js` | Fungsi Vercel: daftar ruangan. |
 | `public/index.html` | Halaman yang tampil di tablet. |
-| `find-calendar.js` | Skrip **lokal** untuk cari `calendar_id` (dijalankan di laptop, sekali). |
+| `find-rooms.js` | Skrip **lokal** untuk cari `room_id` semua ruangan (dijalankan di laptop, sekali). |
 | `server.js` | Server **lokal** untuk uji coba di laptop (Vercel tidak memakainya). |
 | `.env.example` | Template kredensial untuk uji lokal. |
 | `vercel.json` | Setting Vercel (region Singapura). |
-
-> Catatan: file `rooms.json` versi lama sudah tidak dipakai — boleh dihapus. Konfigurasi ruangan sekarang ada di `lib/config.js`.
 
 ---
 
@@ -37,31 +35,33 @@ tablet/refresh berbagi satu panggilan ke Lark (hemat & cepat).
 2. Catat **App ID** (`cli_...`) dan **App Secret**.
 3. Menu **Permissions & Scopes** → tambahkan scope:
    - `calendar:calendar:readonly`
+   - scope **VC rooms & reservation** (agar judul meeting & pemesan ikut terbaca)
 4. **Publish / Release** app untuk organisasi Anda (perlu approval admin).
-5. Pastikan kalender tiap ruang meeting bisa diakses app. Kalau nanti ruangan tak muncul
-   saat dicari, minta admin membagikan kalender ruangan ke app, atau ambil `calendar_id`
-   dari **Admin Console → Meeting Room**.
+5. Pastikan meeting room terlihat oleh app. Kalau ruangan tak muncul saat
+   `node find-rooms.js`, cek daftar ruangan di **Admin Console → Meeting Room**
+   dan scope VC app-nya.
 
 > Pakai Feishu (Tiongkok)? Set env `LARK_BASE_URL=https://open.feishu.cn`. Untuk Lark
 > internasional (umumnya Indonesia), biarkan default.
 
 ---
 
-## Langkah 2 — Cari calendar_id tiap ruangan (di laptop Anda)
+## Langkah 2 — Cari room_id tiap ruangan (di laptop Anda)
 
 Butuh Node.js 18+ di laptop. Di folder proyek:
 
 ```bash
 cp .env.example .env      # isi LARK_APP_ID & LARK_APP_SECRET
-node find-calendar.js "Ruang Garuda"
+node find-rooms.js
 ```
 
-Akan muncul `calendar_id`. Lakukan untuk tiap ruangan, lalu isi ke **`lib/config.js`**:
+Akan muncul daftar `room_id` (format `omm_...`) semua meeting room yang bisa diakses app.
+Isi ke **`lib/config.js`**:
 
 ```js
 export const ROOMS = [
-  { key: 'garuda',   name: 'Ruang Garuda',   capacity: 10, location: 'Lantai 3', calendar_id: 'feishu.cn_xxxx@group...' },
-  { key: 'rajawali', name: 'Ruang Rajawali', capacity: 6,  location: 'Lantai 2', calendar_id: 'feishu.cn_yyyy@group...' },
+  { key: 'garuda',   name: 'Ruang Garuda',   capacity: 10, location: 'Lantai 3', room_id: 'omm_xxxx...' },
+  { key: 'rajawali', name: 'Ruang Rajawali', capacity: 6,  location: 'Lantai 2', room_id: 'omm_yyyy...' },
 ];
 ```
 
