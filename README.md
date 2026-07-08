@@ -10,6 +10,7 @@
 [![Node](https://img.shields.io/badge/node-%E2%89%A518-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org)
 [![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)]()
 [![Module](https://img.shields.io/badge/module-ESM-blue)]()
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Andre%20Marshandito-0A66C2?logo=linkedin&logoColor=white)](https://www.linkedin.com/in/andre-marshandito)
 
 <br>
 
@@ -163,6 +164,12 @@ Gagal → `502 { "error": "..." }` · Room tidak dikenal → `404` · Semua resp
 
 - `LARK_APP_SECRET` hanya hidup di Environment Variables Vercel / `.env` lokal — tidak pernah dikirim ke tablet, tablet hanya menerima JSON hasil olahan.
 - `.env` berisi kredensial asli dan sudah masuk `.gitignore` — jangan pernah di-commit.
+
+## Pembuat
+
+**Andre Marshandito** — Software Engineer
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Terhubung-0A66C2?logo=linkedin&logoColor=white)](https://www.linkedin.com/in/andre-marshandito)
 
 ---
 
